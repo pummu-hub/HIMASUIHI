@@ -1,7 +1,7 @@
 //
 //  ContentView.swift
 //  WatareruMon
-//
+//　メインUIコード
 //  Created by 槇原 陸斗 on 2025/09/07.
 //
 
