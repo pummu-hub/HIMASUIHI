@@ -12,8 +12,7 @@ struct ContentView: View {
     @State private var secondsUntilChangeDisplay: Int = 0 // 表示したい次の信号までの時間を保持する変数
     @State private var NextSignalColorDisplay: String = "" // 表示したい次の信号色を表す文字列を保持する変数
     @State private var isNotificationOn = false // 残り時間の通知機能を切り替えるためのフラグ
-    @State private var didScheduleNotification = false // 通知
-    // 信号・残り時間表示更新用の毎秒呼び出しタイマー
+
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     var body: some View {
@@ -104,7 +103,6 @@ struct ContentView: View {
                                         nextTrafficColor: TimeCalculator().current_signal,
                                         timeSecDelay: 5
                                     )
-                                    didScheduleNotification = true
                                 }
                             }
                         
