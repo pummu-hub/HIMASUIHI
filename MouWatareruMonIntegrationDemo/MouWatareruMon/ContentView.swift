@@ -9,10 +9,10 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var selectionValue: String? = nil
-    @State private var secondsUntilChangeDisplay: Int = 0
-    @State private var NextSignalColorDisplay: String = ""
-    @State private var isNotificationOn = false
-    @State private var didScheduleNotification = false
+    @State private var secondsUntilChangeDisplay: Int = 0 // 表示したい次の信号までの時間を保持する変数
+    @State private var NextSignalColorDisplay: String = "" // 表示したい次の信号色を表す文字列を保持する変数
+    @State private var isNotificationOn = false // 残り時間の通知機能を切り替えるためのフラグ
+    @State private var didScheduleNotification = false // 通知
     // 信号・残り時間表示更新用の毎秒呼び出しタイマー
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
@@ -98,14 +98,8 @@ struct ContentView: View {
                             .font(.system(size: 25)).onReceive(timer) { _ in
                                 NextSignalColorDisplay = "青信号" == TimeCalculator().current_signal ? "赤信号" : "青信号"
                                 secondsUntilChangeDisplay = TimeCalculator().secondsUntilChange
-                                // Reset the flag when a new cycle begins
-                                if secondsUntilChangeDisplay > 5 {
-                                    didScheduleNotification = false
-                                }
 
-                                // If 5 seconds remain and we haven't sent a notification yet for this cycle...
-                                if secondsUntilChangeDisplay == 5 && !didScheduleNotification && isNotificationOn {
-                                    // ...send the notification and set the flag to true.
+                                if secondsUntilChangeDisplay == 5 && isNotificationOn {
                                     sendTrafficNotification(
                                         nextTrafficColor: TimeCalculator().current_signal,
                                         timeSecDelay: 5
