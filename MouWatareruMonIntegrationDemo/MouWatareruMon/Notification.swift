@@ -12,11 +12,11 @@ import UserNotifications
 /// - Parameters:
 ///   - nextTrafficColor: 表示したい次の信号色
 ///   - timeSecDelay: 表示したい次の信号までの残り時間（秒）
-func sendTrafficNotification(nextTrafficColor: String, timeSecDelay: Double) {
+func sendTrafficNotification(nextTrafficColor: String, timeSecDelay: Int) {
     print("次の信号までの残り時間通知が送信されました")
     let content = UNMutableNotificationContent()
     content.title = "信号のお知らせ"
-    content.body = "🚦\(nextTrafficColor)まで 後 \(Int(timeSecDelay))秒です"
+    content.body = "🚦\(nextTrafficColor)まで 後 \(timeSecDelay)秒です"
     content.badge = 1
     content.sound = .default
 

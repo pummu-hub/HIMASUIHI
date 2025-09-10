@@ -10,9 +10,9 @@ import SwiftUI
 struct ContentView: View {
     @State private var selectionValue: String? = nil
     @State private var secondsUntilChangeDisplay: Int = 0 // 表示したい次の信号までの時間を保持する変数
-    @State private var NextSignalColorDisplay: String = "" // 表示したい次の信号色を表す文字列を保持する変数
+    @State private var nextTrafficColorDisplay: String = "" // 表示したい次の信号色を表す文字列を保持する変数
     @State private var isNotificationOn = false // 残り時間の通知機能を切り替えるためのフラグ
-
+    private var notificationTimingSec = 10 // 信号が変わる何秒前に通知するかを設定する変数
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     var body: some View {
@@ -25,13 +25,13 @@ struct ContentView: View {
             VStack {
                 
                 Toggle(isOn: $isNotificationOn) {
-                    Text("信号が変わる5秒前に通知")
+                    Text("信号が変わる\(notificationTimingSec)秒前に通知")
                 }
                 ZStack {
                     //信号機を模した図形の背景
                     //ここのカラーを信号が青の時は緑、赤の時は赤色にする
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(NextSignalColorDisplay == "赤信号" ? Color.green.opacity(0.6) : Color.red.opacity(0.6))
+                        .fill(nextTrafficColorDisplay == "赤信号" ? Color.green.opacity(0.6) : Color.red.opacity(0.6))
                         .frame(width: 400, height: 400)
                     
                     //ここから信号機の図形配置
@@ -93,15 +93,15 @@ struct ContentView: View {
                     //文字の位置調整用
                     VStack{
                         //この"赤"を青と赤を管理している変数に、"60"をカウントしている変数に置き換えお願いします
-                        Text("次\(NextSignalColorDisplay)になるまで：\(secondsUntilChangeDisplay)秒")
+                        Text("次\(nextTrafficColorDisplay)になるまで：\(secondsUntilChangeDisplay)秒")
                             .font(.system(size: 25)).onReceive(timer) { _ in
-                                NextSignalColorDisplay = "青信号" == TimeCalculator().current_signal ? "赤信号" : "青信号"
+                                nextTrafficColorDisplay = "青信号" == TimeCalculator().current_signal ? "赤信号" : "青信号"
                                 secondsUntilChangeDisplay = TimeCalculator().secondsUntilChange
 
-                                if secondsUntilChangeDisplay == 5 && isNotificationOn {
+                                if secondsUntilChangeDisplay == notificationTimingSec && isNotificationOn {
                                     sendTrafficNotification(
-                                        nextTrafficColor: TimeCalculator().current_signal,
-                                        timeSecDelay: 5
+                                        nextTrafficColor: nextTrafficColorDisplay,
+                                        timeSecDelay: notificationTimingSec
                                     )
                                 }
                             }
