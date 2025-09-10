@@ -10,7 +10,9 @@ import SwiftUI
 struct ContentView: View {
     @State private var selectionValue: String? = nil
     @State private var secondsUntilChangeDisplay: Int = 0
-    @State private var signalColorDisplay: String = ""
+    @State private var NextSignalColorDisplay: String = ""
+    @State private var isNotificationOn = false
+    @State private var didScheduleNotification = false
     // 信号・残り時間表示更新用の毎秒呼び出しタイマー
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
@@ -22,11 +24,15 @@ struct ContentView: View {
             
             //ここからUIの設置
             VStack {
+                
+                Toggle(isOn: $isNotificationOn) {
+                    Text("信号が変わる5秒前に通知")
+                }
                 ZStack {
                     //信号機を模した図形の背景
                     //ここのカラーを信号が青の時は緑、赤の時は赤色にする
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(signalColorDisplay == "赤信号" ? Color.green.opacity(0.6) : Color.red.opacity(0.6))
+                        .fill(NextSignalColorDisplay == "赤信号" ? Color.green.opacity(0.6) : Color.red.opacity(0.6))
                         .frame(width: 400, height: 400)
                     
                     //ここから信号機の図形配置
@@ -88,10 +94,24 @@ struct ContentView: View {
                     //文字の位置調整用
                     VStack{
                         //この"赤"を青と赤を管理している変数に、"60"をカウントしている変数に置き換えお願いします
-                        Text("次\(signalColorDisplay)になるまで：\(secondsUntilChangeDisplay)秒")
+                        Text("次\(NextSignalColorDisplay)になるまで：\(secondsUntilChangeDisplay)秒")
                             .font(.system(size: 25)).onReceive(timer) { _ in
-                                signalColorDisplay = TimeCalculator().current_signal
+                                NextSignalColorDisplay = "青信号" == TimeCalculator().current_signal ? "赤信号" : "青信号"
                                 secondsUntilChangeDisplay = TimeCalculator().secondsUntilChange
+                                // Reset the flag when a new cycle begins
+                                if secondsUntilChangeDisplay > 5 {
+                                    didScheduleNotification = false
+                                }
+
+                                // If 5 seconds remain and we haven't sent a notification yet for this cycle...
+                                if secondsUntilChangeDisplay == 5 && !didScheduleNotification && isNotificationOn {
+                                    // ...send the notification and set the flag to true.
+                                    sendTrafficNotification(
+                                        nextTrafficColor: TimeCalculator().current_signal,
+                                        timeSecDelay: 5
+                                    )
+                                    didScheduleNotification = true
+                                }
                             }
                         
                         //このTextを変えればいいと思います（歩きで間に合います, 早歩きを推奨しますetc...）

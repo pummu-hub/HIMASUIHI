@@ -9,6 +9,12 @@ import SwiftUI
 
 @main
 struct MouWatareruMonApp: App {
+
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
+    init() {
+        requestNotificationPermission()
+    }
     var body: some Scene {
         WindowGroup {
             ContentView()
