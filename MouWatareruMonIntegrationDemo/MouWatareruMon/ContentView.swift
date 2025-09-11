@@ -9,13 +9,15 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var selectionValue: String? = nil
-    @State private var secondsUntilChangeDisplay: Int = 0 // 次の信号までの時間の表示を保持する変数
-    @State private var nextTrafficColorDisplay: String = "" // 次の信号色を表す文字列を保持する変数
+    @State private var secondsUntilChangeDisplay: Int = 0 // 表示したい次の信号までの時間を保持する変数
+    @State private var nextTrafficColorDisplay: String = "" // 表示したい次の信号色を表す文字列を保持する変数
     @State private var isNotificationOn = false // 残り時間の通知機能を切り替えるためのフラグ
+    @StateObject private var weatherManager = WeatherManager()
     private var notificationTimingSec = 10 // 信号が変わる何秒前に通知するかを設定する変数
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     var body: some View {
+        
         
         ZStack {
             //全体背景の色設定
@@ -71,7 +73,6 @@ struct ContentView: View {
                     
                     
                 }
-                
                 Text("今いる場所を選択してください\(selectionValue ?? "")")
                     .font(.system(size: 20))
                     .multilineTextAlignment(.center)
@@ -95,10 +96,9 @@ struct ContentView: View {
                         //この"赤"を青と赤を管理している変数に、"60"をカウントしている変数に置き換えお願いします
                         Text("次\(nextTrafficColorDisplay)になるまで：\(secondsUntilChangeDisplay)秒")
                             .font(.system(size: 25)).onReceive(timer) { _ in
-                                let timeCalc = TimeCalculator()
-                                nextTrafficColorDisplay = "青信号" == timeCalc.status.state ? "赤信号" : "青信号"
-                                secondsUntilChangeDisplay = timeCalc.status.remainingTime
-
+                                nextTrafficColorDisplay = "青信号" == TimeCalculator().status.state ? "赤信号" : "青信号"
+                                secondsUntilChangeDisplay = TimeCalculator().status.remainingTime
+                                
                                 if secondsUntilChangeDisplay == notificationTimingSec && isNotificationOn {
                                     sendTrafficNotification(
                                         nextTrafficColor: nextTrafficColorDisplay,
@@ -108,7 +108,7 @@ struct ContentView: View {
                             }
                         
                         //このTextを変えればいいと思います（歩きで間に合います, 早歩きを推奨しますetc...）
-                        Text("早歩きを推奨します")
+                        Text(generateCombinedAdvice(location: selectionValue, weather: weatherManager.condition, signal: TimeCalculator().status))
                             .font(.system(size: 30))
                         
                         //文字の位置調整用のframe
@@ -116,13 +116,119 @@ struct ContentView: View {
                     }
                     
                 }
+                .onAppear {
+                    weatherManager.fetchWeather(for: "Tokyo") {
+                        print("天気取得完了: \(weatherManager.condition)")
+                    }
+                }
             }
+            
+            
+        }
+    }
+    
+//    #Preview {
+//        ContentView()
+//    }
+    
+    
+    func generateCombinedAdvice(location: String?, weather: String, signal: SignalStatus) -> String {
+        guard let location = location else {
+            return "場所を選択してください"
         }
         
-    
+        let trimmedLocation = location.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        switch trimmedLocation {
+        case "E館エントランス":
+            switch weather {
+            case "Rain", "Snow":
+                if signal.state == "青信号" && signal.remainingTime >= 10 {
+                    return "歩いて間に合います"
+                } else if signal.state == "赤信号" && signal.remainingTime >= 80 {
+                    return "歩いて間に合います"
+                } else {
+                    return "早歩きを推奨します"
+                }
+                
+            case "Clear":
+                if signal.state == "青信号" && signal.remainingTime >= 5 {
+                    return "歩いて間に合います"
+                } else if signal.state == "赤信号" && signal.remainingTime >= 75 {
+                    return "歩いて間に合います"
+                } else {
+                    return "早歩きを推奨します"
+                }
+                
+            default:
+                if signal.state == "青信号" && signal.remainingTime >= 7 {
+                    return "歩いて間に合います"
+                } else if signal.state == "赤信号" && signal.remainingTime >= 77 {
+                    return "歩いて間に合います"
+                } else {
+                    return "早歩きを推奨します"
+                }
+            }
+        case "B館エントランス":
+            switch weather {
+            case "Rain", "Snow":
+                if signal.state == "青信号" && signal.remainingTime >= 20 {
+                    return "歩いて間に合います"
+                } else if signal.state == "赤信号" && signal.remainingTime >= 10 {
+                    return "歩いて間に合います"
+                } else {
+                    return "早歩きを推奨します"
+                }
+                
+            case "Clear":
+                if signal.state == "青信号" && signal.remainingTime >= 15 {
+                    return "歩いて間に合います"
+                } else if signal.state == "赤信号" && signal.remainingTime >= 5 {
+                    return "歩いて間に合います"
+                } else {
+                    return "早歩きを推奨します"
+                }
+                
+            default:
+                if signal.state == "青信号" && signal.remainingTime >= 17 {
+                    return "歩いて間に合います"
+                } else if signal.state == "赤信号" && signal.remainingTime >= 7 {
+                    return "歩いて間に合います"
+                } else {
+                    return "早歩きを推奨します"
+                }
+            }
+            
+        case "November食堂前":
+            switch weather {
+            case "Rain", "Snow":
+                if signal.state == "青信号" && signal.remainingTime >= 23 {
+                    return "歩いて間に合います"
+                } else if signal.state == "赤信号" && signal.remainingTime >= 10 {
+                    return "歩いて間に合います"
+                } else {
+                    return "早歩きを推奨します"
+                }
+            case "Clear":
+                if signal.state == "青信号" && signal.remainingTime >= 18 {
+                    return "歩いて間に合います"
+                } else if signal.state == "赤信号" && signal.remainingTime >= 5 {
+                    return "歩いて間に合います"
+                } else {
+                    return "早歩きを推奨します"
+                }
+            default:
+                if signal.state == "青信号" && signal.remainingTime >= 20 {
+                    return "歩いて間に合います"
+                } else if signal.state == "赤信号" && signal.remainingTime >= 8 {
+                    return "歩いて間に合います"
+                } else {
+                    return "早歩きを推奨します"
+                }
+            }
+            
+        default:
+            return "場所を選択してください"
+        }
     }
-}
-
-#Preview {
-    ContentView()
 }
