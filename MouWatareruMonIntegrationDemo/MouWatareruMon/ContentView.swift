@@ -96,8 +96,8 @@ struct ContentView: View {
                         Text("次\(nextTrafficColorDisplay)になるまで：\(secondsUntilChangeDisplay)秒")
                             .font(.system(size: 25)).onReceive(timer) { _ in
                                 let timeCalc = TimeCalculator()
-                                nextTrafficColorDisplay = "青信号" == timeCalc.current_signal ? "赤信号" : "青信号"
-                                secondsUntilChangeDisplay = timeCalc.secondsUntilChange
+                                nextTrafficColorDisplay = "青信号" == TimeCalculator().status.state ? "赤信号" : "青信号"
+                                secondsUntilChangeDisplay = TimeCalculator().status.remainingTime
 
                                 if secondsUntilChangeDisplay == notificationTimingSec && isNotificationOn {
                                     sendTrafficNotification(
