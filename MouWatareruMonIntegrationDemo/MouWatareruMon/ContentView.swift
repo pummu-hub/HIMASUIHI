@@ -95,8 +95,9 @@ struct ContentView: View {
                         //この"赤"を青と赤を管理している変数に、"60"をカウントしている変数に置き換えお願いします
                         Text("次\(nextTrafficColorDisplay)になるまで：\(secondsUntilChangeDisplay)秒")
                             .font(.system(size: 25)).onReceive(timer) { _ in
-                                nextTrafficColorDisplay = "青信号" == TimeCalculator().current_signal ? "赤信号" : "青信号"
-                                secondsUntilChangeDisplay = TimeCalculator().secondsUntilChange
+                                let timeCalc = TimeCalculator()
+                                nextTrafficColorDisplay = "青信号" == timeCalc.current_signal ? "赤信号" : "青信号"
+                                secondsUntilChangeDisplay = timeCalc.secondsUntilChange
 
                                 if secondsUntilChangeDisplay == notificationTimingSec && isNotificationOn {
                                     sendTrafficNotification(
