@@ -13,14 +13,14 @@ struct SignalStatus { //信号の状態
     let cycle: Int          //周期
 }
 
-func getSignalState(at date: Date) -> String {
-    let calendar = Calendar.current
+func getSignalState(at date: Date) -> SignalStatus {
+    var calendar = Calendar.current
     calendar.timeZone = TimeZone.current
         
     // 基準日時：2025年9月6日（土）12:00:00
     let baseComponents = DateComponents(year: 2025, month: 9, day: 6, hour: 12, minute: 0, second: 0)
     guard let baseDate = calendar.date(from: baseComponents) else {
-        return "エラー: 基準日時を生成できませんでした"
+        return SignalStatus(state: "不明", remainingTime: 0, phase: 0, cycle: 0)
     }
     
     //1日あたりのズレ
@@ -56,16 +56,12 @@ func getSignalState(at date: Date) -> String {
     
     let phase = effectiveElapsedSeconds.truncatingRemainder(dividingBy: cycleDuration)
     
-    let state: String
-    let remainingTime: Int
+
     
-    if phase < greenDuration {
-        state = "青"
-        remainingTime: Int(ceil(greenDuration - phase))
-    } else {
-        state = "赤"
-        remainingTime: Int(ceil(cycleDuration - phase))
-    }
+    let state = phase < greenDuration ? "青信号" : "赤信号"
+    let remainingTime = phase < greenDuration
+        ? Int(ceil(greenDuration - phase))
+        : Int(ceil(cycleDuration - phase))
         
     return SignalStatus(
         state: state,
@@ -76,6 +72,5 @@ func getSignalState(at date: Date) -> String {
 }
 //時間計算
 class TimeCalculator {
-    let now = Date()
-    let status = getSignalState(at: now)
+    let status = getSignalState(at: Date())
 }
