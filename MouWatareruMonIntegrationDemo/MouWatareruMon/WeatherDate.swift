@@ -73,7 +73,7 @@ struct ContentViewOfWeather: View {
     let calculator = Calculator()
     
     // 計算用データ
-    let city = "Tokyo"
+    let city = "Osaka"
     let baseValue = 100.0
     
     var body: some View {
