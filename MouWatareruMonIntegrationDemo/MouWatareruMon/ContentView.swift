@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import ActivityKit
+
 
 struct ContentView: View {
     @State private var selectionValue: String? = nil
@@ -15,6 +17,9 @@ struct ContentView: View {
     @StateObject private var weatherManager = WeatherManager()
     private var notificationTimingSec = 10 // 信号が変わる何秒前に通知するかを設定する変数
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+  
+    @State private var activity: Activity<WatareruLiveKitAttributes>?
+
     
     var body: some View {
         
@@ -123,7 +128,21 @@ struct ContentView: View {
                 }
             }
             
-            
+            .onAppear {
+              let attrs = WatareruLiveKitAttributes(name: "world")
+              let state = WatareruLiveKitAttributes.ContentState(emoji: "💩")
+              let content = ActivityContent(state: state, staleDate: nil)
+              
+              do {
+                activity = try Activity.request(
+                  attributes: attrs,
+                  content: content,
+                  pushType: nil
+                )
+              } catch {
+                print("request failed:", error)
+              }
+            }
         }
     }
     
