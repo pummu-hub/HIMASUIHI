@@ -45,13 +45,33 @@ struct WatareruLiveKitEntryView : View {
   var entry: Provider.Entry
   
   var body: some View {
-    VStack {
-      Text("Time:")
-      Text(entry.date, style: .time)
+    let signalStatus = getSignalState(at: entry.date)
+    
+    VStack(spacing: 4) {
+      HStack {
+        Circle()
+          .fill(signalStatus.state == "青信号" ? Color.green : Color.red)
+          .frame(width: 12, height: 12)
+        Text(signalStatus.state)
+          .font(.caption)
+          .fontWeight(.semibold)
+        Spacer()
+      }
       
-      Text("Favorite Emoji:")
+      HStack {
+        Text("残り")
+          .font(.caption2)
+          .foregroundColor(.secondary)
+        Text("\(signalStatus.remainingTime)秒")
+          .font(.headline)
+          .fontWeight(.bold)
+        Spacer()
+      }
+      
       Text(entry.configuration.favoriteEmoji)
+        .font(.title2)
     }
+    .padding(.horizontal, 8)
   }
 }
 
@@ -69,13 +89,13 @@ struct WatareruLiveKit: Widget {
 extension ConfigurationAppIntent {
   fileprivate static var smiley: ConfigurationAppIntent {
     let intent = ConfigurationAppIntent()
-    intent.favoriteEmoji = "😀"
+    intent.favoriteEmoji = "🚦"
     return intent
   }
   
   fileprivate static var starEyes: ConfigurationAppIntent {
     let intent = ConfigurationAppIntent()
-    intent.favoriteEmoji = "🤩"
+    intent.favoriteEmoji = "🚶"
     return intent
   }
 }
