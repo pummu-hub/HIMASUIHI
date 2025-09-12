@@ -129,22 +129,59 @@ struct ContentView: View {
             }
             
             .onAppear {
-              let attrs = WatareruLiveKitAttributes(name: "world")
-              let state = WatareruLiveKitAttributes.ContentState(emoji: "💩")
-              let content = ActivityContent(state: state, staleDate: nil)
-              
-              do {
-                activity = try Activity.request(
-                  attributes: attrs,
-                  content: content,
-                  pushType: nil
-                )
-              } catch {
-                print("request failed:", error)
-              }
+                startSignalActivity()
+            }
+            .onReceive(timer) { _ in
+                updateSignalActivity()
             }
         }
     }
+    
+  func startSignalActivity() {
+    let attrs = WatareruLiveKitAttributes(universityName: "近畿大学")
+    let signalStatus = TimeCalculator().status
+    let currentLocation = selectionValue?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "未選択"
+    let advice = generateCombinedAdvice(location: selectionValue, weather: weatherManager.condition, signal: signalStatus)
+    
+    let state = WatareruLiveKitAttributes.ContentState(
+      signalState: signalStatus.state,
+      remainingTime: signalStatus.remainingTime,
+      location: currentLocation,
+      advice: advice
+    )
+    let content = ActivityContent(state: state, staleDate: Date().addingTimeInterval(60))
+    
+    do {
+      activity = try Activity.request(
+        attributes: attrs,
+        content: content,
+        pushType: nil
+      )
+    } catch {
+      print("Live Activity request failed:", error)
+    }
+  }
+  
+  func updateSignalActivity() {
+    guard let activity = activity else { return }
+    
+    let signalStatus = TimeCalculator().status
+    let currentLocation = selectionValue?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "未選択"
+    let advice = generateCombinedAdvice(location: selectionValue, weather: weatherManager.condition, signal: signalStatus)
+    
+    let updatedState = WatareruLiveKitAttributes.ContentState(
+      signalState: signalStatus.state,
+      remainingTime: signalStatus.remainingTime,
+      location: currentLocation,
+      advice: advice
+    )
+    
+    let content = ActivityContent(state: updatedState, staleDate: Date().addingTimeInterval(60))
+    
+    Task {
+      await activity.update(content)
+    }
+  }
     
 //    #Preview {
 //        ContentView()
