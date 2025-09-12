@@ -14,6 +14,7 @@ struct SignalStatus {
   let remainingTime: Int
   let phase: Int
   let cycle: Int
+  let endTime: Date
 }
 
 func getSignalState(at date: Date) -> SignalStatus {
@@ -22,7 +23,7 @@ func getSignalState(at date: Date) -> SignalStatus {
   
   let baseComponents = DateComponents(year: 2025, month: 9, day: 6, hour: 12, minute: 0, second: 0)
   guard let baseDate = calendar.date(from: baseComponents) else {
-    return SignalStatus(state: "不明", remainingTime: 0, phase: 0, cycle: 0)
+    return SignalStatus(state: "不明", remainingTime: 0, phase: 0, cycle: 0, endTime: date)
   }
   
   let dailyDrift: TimeInterval = 38
@@ -60,11 +61,14 @@ func getSignalState(at date: Date) -> SignalStatus {
   ? Int(ceil(greenDuration - phase))
   : Int(ceil(cycleDuration - phase))
   
+  let endTime = date.addingTimeInterval(TimeInterval(remainingTime))
+  
   return SignalStatus(
     state: state,
     remainingTime: remainingTime,
     phase: Int(phase),
-    cycle: Int(cycleDuration)
+    cycle: Int(cycleDuration),
+    endTime: endTime
   )
 }
 

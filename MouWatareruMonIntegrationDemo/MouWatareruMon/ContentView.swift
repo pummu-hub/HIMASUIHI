@@ -142,10 +142,11 @@ struct ContentView: View {
     let signalStatus = TimeCalculator().status
     let currentLocation = selectionValue?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "未選択"
     let advice = generateCombinedAdvice(location: selectionValue, weather: weatherManager.condition, signal: signalStatus)
+    let endTime = Date().addingTimeInterval(TimeInterval(signalStatus.remainingTime))
     
     let state = WatareruLiveKitAttributes.ContentState(
       signalState: signalStatus.state,
-      remainingTime: signalStatus.remainingTime,
+      signalEndTime: endTime,
       location: currentLocation,
       advice: advice
     )
@@ -168,10 +169,11 @@ struct ContentView: View {
     let signalStatus = TimeCalculator().status
     let currentLocation = selectionValue?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "未選択"
     let advice = generateCombinedAdvice(location: selectionValue, weather: weatherManager.condition, signal: signalStatus)
+    let endTime = Date().addingTimeInterval(TimeInterval(signalStatus.remainingTime))
     
     let updatedState = WatareruLiveKitAttributes.ContentState(
       signalState: signalStatus.state,
-      remainingTime: signalStatus.remainingTime,
+      signalEndTime: endTime,
       location: currentLocation,
       advice: advice
     )

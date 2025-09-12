@@ -12,7 +12,7 @@ import SwiftUI
 struct WatareruLiveKitAttributes: ActivityAttributes {
   public struct ContentState: Codable, Hashable {
     var signalState: String
-    var remainingTime: Int
+    var signalEndTime: Date
     var location: String
     var advice: String
   }
@@ -32,9 +32,10 @@ struct WatareruLiveKitLiveActivity: Widget {
             .font(.headline)
             .fontWeight(.bold)
           Spacer()
-          Text("\(context.state.remainingTime)秒")
+          Text(context.state.signalEndTime, style: .timer)
             .font(.title2)
             .fontWeight(.bold)
+            .multilineTextAlignment(.trailing)
         }
         
         HStack {
@@ -66,11 +67,10 @@ struct WatareruLiveKitLiveActivity: Widget {
         }
         DynamicIslandExpandedRegion(.trailing) {
           VStack(alignment: .trailing) {
-            Text("\(context.state.remainingTime)")
+            Text(context.state.signalEndTime, style: .timer)
               .font(.title3)
               .fontWeight(.bold)
-            Text("秒")
-              .font(.caption)
+              .multilineTextAlignment(.trailing)
           }
         }
         DynamicIslandExpandedRegion(.bottom) {
@@ -88,9 +88,10 @@ struct WatareruLiveKitLiveActivity: Widget {
           .fill(context.state.signalState == "青信号" ? Color.green : Color.red)
           .frame(width: 16, height: 16)
       } compactTrailing: {
-        Text("\(context.state.remainingTime)")
+        Text(context.state.signalEndTime, style: .timer)
           .font(.caption)
           .fontWeight(.bold)
+          .multilineTextAlignment(.trailing)
       } minimal: {
         Circle()
           .fill(context.state.signalState == "青信号" ? Color.green : Color.red)
@@ -104,7 +105,7 @@ struct WatareruLiveKitLiveActivity: Widget {
 
 extension WatareruLiveKitAttributes {
   fileprivate static var preview: WatareruLiveKitAttributes {
-    WatareruLiveKitAttributes(universityName: "HIMASUIHI大学")
+    WatareruLiveKitAttributes(universityName: "KINKY UNIVERSITY")
   }
 }
 
@@ -112,7 +113,7 @@ extension WatareruLiveKitAttributes.ContentState {
   fileprivate static var greenSignal: WatareruLiveKitAttributes.ContentState {
     WatareruLiveKitAttributes.ContentState(
       signalState: "青信号",
-      remainingTime: 25,
+      signalEndTime: Date().addingTimeInterval(25),
       location: "E館エントランス",
       advice: "歩いて間に合います"
     )
@@ -121,7 +122,7 @@ extension WatareruLiveKitAttributes.ContentState {
   fileprivate static var redSignal: WatareruLiveKitAttributes.ContentState {
     WatareruLiveKitAttributes.ContentState(
       signalState: "赤信号",
-      remainingTime: 85,
+      signalEndTime: Date().addingTimeInterval(85),
       location: "B館エントランス",
       advice: "早歩きを推奨します"
     )
