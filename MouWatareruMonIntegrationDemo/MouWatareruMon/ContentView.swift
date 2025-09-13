@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import ActivityKit
+
 
 struct ContentView: View {
     @State private var selectionValue: String? = nil
@@ -15,6 +17,9 @@ struct ContentView: View {
     @StateObject private var weatherManager = WeatherManager()
     private var notificationTimingSec = 10 // 信号が変わる何秒前に通知するかを設定する変数
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+  
+    @State private var activity: Activity<WatareruLiveKitAttributes>?
+
     
     var body: some View {
         
@@ -123,9 +128,62 @@ struct ContentView: View {
                 }
             }
             
-            
+            .onAppear {
+                startSignalActivity()
+            }
+            .onReceive(timer) { _ in
+                updateSignalActivity()
+            }
         }
     }
+    
+  func startSignalActivity() {
+    let attrs = WatareruLiveKitAttributes(universityName: "近畿大学")
+    let signalStatus = TimeCalculator().status
+    let currentLocation = selectionValue?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "未選択"
+    let advice = generateCombinedAdvice(location: selectionValue, weather: weatherManager.condition, signal: signalStatus)
+    let endTime = Date().addingTimeInterval(TimeInterval(signalStatus.remainingTime))
+    
+    let state = WatareruLiveKitAttributes.ContentState(
+      signalState: signalStatus.state,
+      signalEndTime: endTime,
+      location: currentLocation,
+      advice: advice
+    )
+    let content = ActivityContent(state: state, staleDate: Date().addingTimeInterval(60))
+    
+    do {
+      activity = try Activity.request(
+        attributes: attrs,
+        content: content,
+        pushType: nil
+      )
+    } catch {
+      print("Live Activity request failed:", error)
+    }
+  }
+  
+  func updateSignalActivity() {
+    guard let activity = activity else { return }
+    
+    let signalStatus = TimeCalculator().status
+    let currentLocation = selectionValue?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "未選択"
+    let advice = generateCombinedAdvice(location: selectionValue, weather: weatherManager.condition, signal: signalStatus)
+    let endTime = Date().addingTimeInterval(TimeInterval(signalStatus.remainingTime))
+    
+    let updatedState = WatareruLiveKitAttributes.ContentState(
+      signalState: signalStatus.state,
+      signalEndTime: endTime,
+      location: currentLocation,
+      advice: advice
+    )
+    
+    let content = ActivityContent(state: updatedState, staleDate: Date().addingTimeInterval(60))
+    
+    Task {
+      await activity.update(content)
+    }
+  }
     
 //    #Preview {
 //        ContentView()
